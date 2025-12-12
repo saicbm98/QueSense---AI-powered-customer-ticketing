@@ -46,3 +46,39 @@ export interface AppConfig {
   toneDescription: string;
   knowledgeContext: string;
 }
+
+// Inbox Types
+export interface ChatMessage {
+  id: string;
+  senderId: string; // 'me' or other userId
+  text: string;
+  timestamp: string;
+}
+
+export interface ChatThread {
+  id: string;
+  name: string;
+  avatarUrl?: string; // If undefined, show initials or icon
+  lastMessage: string;
+  lastMessageTime: string;
+  unreadCount: number;
+  isOnline?: boolean;
+  messages: ChatMessage[];
+}
+
+// Knowledge Base Types
+export interface KBArticle {
+  id: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  lastUpdated: string;
+  views: number;
+}
+
+// Toast Notification
+export interface ToastMessage {
+  id: string;
+  type: 'success' | 'error' | 'info';
+  message: string;
+}

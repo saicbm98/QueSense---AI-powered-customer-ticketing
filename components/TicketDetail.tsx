@@ -12,9 +12,10 @@ interface TicketDetailProps {
   config: AppConfig;
   onClose: () => void;
   onUpdateConfig: (newConfig: AppConfig) => void;
+  notify: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-const TicketDetail: React.FC<TicketDetailProps> = ({ ticket, config, onClose, onUpdateConfig }) => {
+const TicketDetail: React.FC<TicketDetailProps> = ({ ticket, config, onClose, onUpdateConfig, notify }) => {
   const [analysis, setAnalysis] = useState<AIAnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   
@@ -64,13 +65,14 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticket, config, onClose, on
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(replyDraft);
-    // Could add toast here
+    notify('Draft copied to clipboard!', 'success');
   };
 
   const saveConfig = () => {
     onUpdateConfig(tempConfig);
     setShowConfig(false);
     handleRegenerate(); // Regenerate with new tone
+    notify('AI Settings saved & reply regenerated', 'success');
   };
 
   return (
@@ -102,7 +104,10 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticket, config, onClose, on
                <Sparkles size={16} />
                <span>Config AI</span>
              </button>
-             <button className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition-colors">
+             <button 
+               onClick={() => notify(`Reply sent to ${ticket.customer.name}`, 'success')}
+               className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition-colors"
+             >
                <Send size={16} />
                Reply via Email
              </button>

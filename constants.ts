@@ -1,4 +1,4 @@
-import { Ticket, AppConfig } from './types';
+import { Ticket, AppConfig, ChatThread, KBArticle, Customer } from './types';
 
 export const INITIAL_CONFIG: AppConfig = {
   brandTone: 'Friendly',
@@ -218,4 +218,61 @@ export const MOCK_TICKETS: Ticket[] = [
     updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
     aiSummary: 'Request for GDPR data deletion.',
   }
+];
+
+export const MOCK_CHATS: ChatThread[] = [
+  {
+    id: 'chat-1',
+    name: 'Support Team',
+    lastMessage: 'Sam: Can someone cover my shift on Friday?',
+    lastMessageTime: '10:30 AM',
+    unreadCount: 2,
+    isOnline: true,
+    messages: [
+      { id: 'm1', senderId: 'other', text: 'Hey team, quick update on the server maintenance.', timestamp: '9:00 AM' },
+      { id: 'm2', senderId: 'me', text: 'Thanks for the heads up.', timestamp: '9:05 AM' },
+      { id: 'm3', senderId: 'sam', text: 'Can someone cover my shift on Friday?', timestamp: '10:30 AM' },
+    ]
+  },
+  {
+    id: 'chat-2',
+    name: 'Sarah Lee',
+    avatarUrl: 'https://picsum.photos/seed/agent2/64/64',
+    lastMessage: 'Lunch?',
+    lastMessageTime: '11:45 AM',
+    unreadCount: 0,
+    isOnline: true,
+    messages: [
+      { id: 'm1', senderId: 'other', text: 'Did you see that ticket from Acme Corp?', timestamp: '11:00 AM' },
+      { id: 'm2', senderId: 'me', text: 'Yeah, handling it now.', timestamp: '11:02 AM' },
+      { id: 'm3', senderId: 'other', text: 'Lunch?', timestamp: '11:45 AM' },
+    ]
+  },
+  {
+    id: 'chat-3',
+    name: 'Sam Patel',
+    avatarUrl: 'https://picsum.photos/seed/agent1/64/64',
+    lastMessage: 'Thanks for helping with that escalation.',
+    lastMessageTime: 'Yesterday',
+    unreadCount: 0,
+    isOnline: false,
+    messages: [
+      { id: 'm1', senderId: 'me', text: 'I escalated that billing issue to engineering.', timestamp: 'Yesterday' },
+      { id: 'm2', senderId: 'other', text: 'Thanks for helping with that escalation.', timestamp: 'Yesterday' },
+    ]
+  },
+];
+
+export const MOCK_KB_ARTICLES: KBArticle[] = [
+  { id: 'kb1', title: 'Setting up SSO with Okta', excerpt: 'Step-by-step guide to configuring SAML 2.0...', category: 'Technical', lastUpdated: '2 days ago', views: 342 },
+  { id: 'kb2', title: 'Understanding Billing Cycles', excerpt: 'How proration works when upgrading plans...', category: 'Billing', lastUpdated: '1 week ago', views: 1205 },
+  { id: 'kb3', title: 'API Rate Limits', excerpt: 'Details on the 1000 req/min limit for Pro plans...', category: 'Technical', lastUpdated: '3 weeks ago', views: 89 },
+  { id: 'kb4', title: 'Inviting Team Members', excerpt: 'How to add admins and agents to your workspace...', category: 'Onboarding', lastUpdated: '1 month ago', views: 567 },
+  { id: 'kb5', title: 'Dark Mode Beta', excerpt: 'How to enable the experimental dark mode theme...', category: 'Product', lastUpdated: '2 days ago', views: 120 },
+];
+
+export const MOCK_CUSTOMERS_LIST: Customer[] = [
+  ...MOCK_TICKETS.map(t => t.customer),
+  { id: 'c10', name: 'Jack Dorsey', company: 'Block Inc', plan: 'Enterprise', mrr: 8000, isHighValue: true, joinedAt: '2020-05-12' },
+  { id: 'c11', name: 'Elon Musk', company: 'SpaceX', plan: 'Enterprise', mrr: 15000, isHighValue: true, joinedAt: '2019-11-01' },
 ];

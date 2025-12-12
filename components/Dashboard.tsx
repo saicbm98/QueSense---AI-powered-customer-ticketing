@@ -6,9 +6,11 @@ import { Search, Filter, Plus, FileDown, BarChart2, AlertCircle, Star, TrendingU
 interface DashboardProps {
   tickets: Ticket[];
   onTicketClick: (ticket: Ticket) => void;
+  onNewTicket: () => void;
+  notify: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ tickets, onTicketClick }) => {
+const Dashboard: React.FC<DashboardProps> = ({ tickets, onTicketClick, onNewTicket, notify }) => {
   const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -106,13 +108,22 @@ const Dashboard: React.FC<DashboardProps> = ({ tickets, onTicketClick }) => {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2 w-full lg:w-auto justify-end p-1">
-           <button className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
+           <button 
+             onClick={() => notify('Performance metrics are coming in Q3!', 'info')}
+             className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
+           >
               <BarChart2 size={16} /> <span className="hidden sm:inline">Performance</span>
            </button>
-           <button className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
+           <button 
+             onClick={() => notify('Import feature requires backend integration.', 'info')}
+             className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
+           >
               <FileDown size={16} /> <span className="hidden sm:inline">Import</span>
            </button>
-           <button className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-primary rounded-lg hover:bg-primary-hover shadow-sm shadow-blue-200">
+           <button 
+             onClick={onNewTicket}
+             className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-primary rounded-lg hover:bg-primary-hover shadow-sm shadow-blue-200"
+           >
               <Plus size={16} /> New Ticket
            </button>
         </div>

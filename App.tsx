@@ -1,24 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Ticket, AppConfig } from './types';
+import { Ticket, AppConfig, ToastMessage } from './types';
 import { MOCK_TICKETS, INITIAL_CONFIG } from './constants';
 import Dashboard from './components/Dashboard';
 import TicketDetail from './components/TicketDetail';
 import SettingsModal from './components/SettingsModal';
+import InboxView from './components/InboxView';
+import NewTicketModal from './components/NewTicketModal';
+import AnalyticsView from './components/AnalyticsView';
+import KnowledgeBaseView from './components/KnowledgeBaseView';
+import CustomersView from './components/CustomersView';
+import Toast from './components/Toast';
 import { Layout, Bell, HelpCircle, User, LogOut, Settings, MessageSquare, Book, BarChart, Users } from 'lucide-react';
-
-// Placeholder component for non-implemented tabs
-const PlaceholderView: React.FC<{ title: string; icon: React.ReactNode; description: string }> = ({ title, icon, description }) => (
-  <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] text-center p-8 animate-fade-in">
-    <div className="w-20 h-20 bg-blue-50 text-primary rounded-full flex items-center justify-center mb-6 shadow-sm">
-      {icon}
-    </div>
-    <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
-    <p className="text-gray-500 max-w-md mb-8">{description}</p>
-    <button className="px-6 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-primary transition-all shadow-sm">
-      Learn More
-    </button>
-  </div>
-);
 
 const App: React.FC = () => {
   const [tickets, setTickets] = useState<Ticket[]>(MOCK_TICKETS);
@@ -30,6 +22,10 @@ const App: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isNewTicketOpen, setIsNewTicketOpen] = useState(false);
+  
+  // Toast State
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   // Refs for click outside
   const notifRef = useRef<HTMLDivElement>(null);
@@ -51,6 +47,15 @@ const App: React.FC = () => {
     };
   }, []);
 
+  const addToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const id = Date.now().toString();
+    setToasts(prev => [...prev, { id, message, type }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
   const handleTicketClick = (ticket: Ticket) => {
     setSelectedTicket(ticket);
   };
@@ -63,20 +68,39 @@ const App: React.FC = () => {
     setConfig(newConfig);
   };
 
+  const handleAddTicket = (newTicket: Ticket) => {
+    setTickets([newTicket, ...tickets]);
+    addToast('New ticket created successfully', 'success');
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'Tickets':
-        return <Dashboard tickets={tickets} onTicketClick={handleTicketClick} />;
+        return (
+          <Dashboard 
+            tickets={tickets} 
+            onTicketClick={handleTicketClick} 
+            onNewTicket={() => setIsNewTicketOpen(true)}
+            notify={addToast}
+          />
+        );
       case 'Inbox':
-        return <PlaceholderView title="Inbox" icon={<MessageSquare size={40} />} description="Your centralized inbox for direct messages, mentions, and internal team chats." />;
+        return <InboxView />;
       case 'Knowledge Base':
-        return <PlaceholderView title="Knowledge Base" icon={<Book size={40} />} description="Manage internal documentation, FAQs, and support guides used by AI for context." />;
+        return <KnowledgeBaseView notify={addToast} />;
       case 'Analytics':
-        return <PlaceholderView title="Analytics" icon={<BarChart size={40} />} description="Track support team performance, response times, sentiment trends, and customer satisfaction." />;
+        return <AnalyticsView />;
       case 'Customers':
-        return <PlaceholderView title="Customers" icon={<Users size={40} />} description="View detailed customer profiles, subscription history, and support engagement metrics." />;
+        return <CustomersView notify={addToast} />;
       default:
-        return <Dashboard tickets={tickets} onTicketClick={handleTicketClick} />;
+        return (
+          <Dashboard 
+            tickets={tickets} 
+            onTicketClick={handleTicketClick} 
+            onNewTicket={() => setIsNewTicketOpen(true)}
+            notify={addToast}
+          />
+        );
     }
   };
 
@@ -131,7 +155,7 @@ const App: React.FC = () => {
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 animate-fade-in-down origin-top-right">
                 <div className="px-4 py-2 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                   <span className="font-semibold text-sm text-gray-800">Notifications</span>
-                  <span className="text-[11px] text-primary font-medium cursor-pointer hover:underline">Mark all read</span>
+                  <span className="text-[11px] text-primary font-medium cursor-pointer hover:underline" onClick={() => addToast("Marked all as read", "success")}>Mark all read</span>
                 </div>
                 <div className="max-h-[300px] overflow-y-auto">
                   <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors">
@@ -158,13 +182,17 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 <div className="px-4 py-2 border-t border-gray-50 text-center">
-                  <span className="text-xs font-medium text-gray-500 hover:text-gray-800 cursor-pointer">View all notifications</span>
+                  <span className="text-xs font-medium text-gray-500 hover:text-gray-800 cursor-pointer" onClick={() => addToast("Viewing all notifications", "info")}>View all notifications</span>
                 </div>
               </div>
             )}
           </div>
 
-          <button className="text-gray-400 hover:text-gray-600 transition-colors" title="Help">
+          <button 
+            className="text-gray-400 hover:text-gray-600 transition-colors" 
+            title="Help"
+            onClick={() => addToast('Help Center is currently undergoing maintenance.', 'info')}
+          >
             <HelpCircle size={20} />
           </button>
           
@@ -200,7 +228,10 @@ const App: React.FC = () => {
                 </div>
                 
                 <div className="py-1">
-                  <button className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary flex items-center gap-3 transition-colors">
+                  <button 
+                    onClick={() => addToast('Opening user profile...', 'info')}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary flex items-center gap-3 transition-colors"
+                  >
                     <User size={16} /> My Profile
                   </button>
                   <button 
@@ -217,7 +248,10 @@ const App: React.FC = () => {
                 <div className="h-px bg-gray-100 my-1"></div>
                 
                 <div className="py-1">
-                  <button className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors">
+                  <button 
+                    onClick={() => addToast('Signing out...', 'info')}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
+                  >
                     <LogOut size={16} /> Sign out
                   </button>
                 </div>
@@ -233,6 +267,13 @@ const App: React.FC = () => {
         {renderContent()}
       </main>
 
+      {/* Toast Notifications */}
+      <div className="fixed bottom-6 right-6 z-[70] flex flex-col gap-3">
+        {toasts.map(toast => (
+          <Toast key={toast.id} toast={toast} onDismiss={removeToast} />
+        ))}
+      </div>
+
       {/* Detail Overlay */}
       {selectedTicket && (
         <TicketDetail 
@@ -240,6 +281,7 @@ const App: React.FC = () => {
           config={config} 
           onClose={handleCloseDetail}
           onUpdateConfig={handleUpdateConfig}
+          notify={addToast}
         />
       )}
 
@@ -249,6 +291,13 @@ const App: React.FC = () => {
         onClose={() => setIsSettingsOpen(false)}
         config={config}
         onUpdateConfig={handleUpdateConfig}
+      />
+
+      {/* New Ticket Modal */}
+      <NewTicketModal 
+        isOpen={isNewTicketOpen}
+        onClose={() => setIsNewTicketOpen(false)}
+        onSave={handleAddTicket}
       />
     </div>
   );
