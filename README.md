@@ -1,7 +1,4 @@
-**Here's the COMPLETE README (nothing cut off):**
-
-```markdown
-# QueueSense
+QueueSense
 
 QueueSense is an AI helper app for B2B SaaS support teams.  
 It reads support tickets, surfaces the most important details, and drafts replies so agents can clear the queue faster with less mental load, while always keeping a human in the loop.
@@ -315,3 +312,5 @@ type Ticket = {
 ### ⚡ Built with determination
 *After losing LinkedIn access, I chose to build instead of complain. This is one of several projects showcasing AI automation, prompt engineering, and rapid product development.*
 ```
+
+**Copy from the first `#` to the last `*` - complete README ready to go!** 🎯
