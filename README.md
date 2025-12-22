@@ -311,6 +311,3 @@ type Ticket = {
 
 ### ⚡ Built with determination
 *After losing LinkedIn access, I chose to build instead of complain. This is one of several projects showcasing AI automation, prompt engineering, and rapid product development.*
-```
-
-**Copy from the first `#` to the last `*` - complete README ready to go!** 🎯
