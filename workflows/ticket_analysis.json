@@ -1,0 +1,93 @@
+{
+  "name": "QueueSense_Ticket_Analysis",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "analyse-ticket",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 0],
+      "id": "webhook-node-id",
+      "name": "Webhook",
+      "webhookId": "YOUR_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyse this support ticket:\n\nSubject: {{ $json.body.subject }}\nMessage: {{ $json.body.body }}\nCustomer: {{ $json.body.customerName }} ({{ $json.body.customerCompany }})\nPlan: {{ $json.body.customerPlan }}\nHigh Value Customer: {{ $json.body.isHighValue }}\n\nReturn ONLY the JSON response, nothing else.",
+        "options": {
+          "systemMessage": "=You are a customer support ticket analyst for a B2B SaaS company called QueueSense.\n\nAnalyze the support ticket and respond with ONLY valid JSON containing:\n- summary: 1-2 sentence summary of the issue\n- suggestedPriority: One of \"Low\", \"Medium\", \"High\", or \"Critical\"\n- sentiment: One of \"Positive\", \"Neutral\", \"Negative\", or \"Urgent\"\n- tags: array of 1-3 short lowercase tags (e.g. \"billing\", \"bug\", \"sso\", \"onboarding\")\n- confidenceScore: number between 0 and 1\n- suggestedAssignee: \"account_manager\" for high-value customers or urgent/critical issues, \"support_agent\" for standard issues\n\nPriority guidelines:\n- Enterprise plan + urgent language = Critical\n- High value customer + any issue = at least High\n- Billing/authentication issues = at least Medium\n- Feature requests from free tier = Low"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [192, 0],
+      "id": "ai-agent-id",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [64, 208],
+      "id": "openai-model-id",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = JSON.parse($input.first().json.output);\n\nreturn [{\n  json: {\n    summary: parsed.summary,\n    suggestedPriority: parsed.suggestedPriority,\n    sentiment: parsed.sentiment,\n    tags: parsed.tags,\n    confidenceScore: parsed.confidenceScore,\n    suggestedAssignee: parsed.suggestedAssignee\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [544, 0],
+      "id": "code-node-id",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [752, 0],
+      "id": "respond-webhook-id",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "AI Agent", "type": "main", "index": 0}]]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [[{"node": "AI Agent", "type": "ai_languageModel", "index": 0}]]
+    },
+    "AI Agent": {
+      "main": [[{"node": "Code in JavaScript", "type": "main", "index": 0}]]
+    },
+    "Code in JavaScript": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
