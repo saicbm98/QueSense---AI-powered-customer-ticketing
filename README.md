@@ -1,4 +1,4 @@
-# QueueSense | AI-Powered Customer Support Triage
+# QueueSense | AI-Powered Customer Support Platform
 
 > **An AI assistant for B2B SaaS support teams that reads tickets, summarises the issue, and drafts replies so agents can clear the queue faster while staying in control**
 
