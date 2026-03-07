@@ -1,313 +1,252 @@
-QueueSense
+# QueueSense | AI-Powered Customer Support Triage
 
-QueueSense is an AI helper app for B2B SaaS support teams.  
-It reads support tickets, surfaces the most important details, and drafts replies so agents can clear the queue faster with less mental load, while always keeping a human in the loop.
-
-> Demo and portfolio project, designed to feel like a real support tool for a mid sized B2B SaaS company.
+> **An AI assistant for B2B SaaS support teams that reads tickets, summarises the issue, and drafts replies so agents can clear the queue faster while staying in control**
 
 ---
 
-## Table of contents
+## 🎯 What This Does
 
-- [Overview](#overview)
-- [Who is it for](#who-is-it-for)
-- [Core problems](#core-problems)
-- [Key features](#key-features)
-- [User flow](#user-flow)
-- [AI behavior and prompts](#ai-behavior-and-prompts)
-- [Interface and design](#interface-and-design)
-- [Data model](#data-model)
-- [Architecture](#architecture)
-- [Getting started](#getting-started)
-- [Configuration](#configuration)
-- [Roadmap](#roadmap)
-- [License](#license)
+Customer support agents waste hours reading long messages and writing replies from scratch. QueueSense changes that.
 
----
+When a ticket comes in:
+- AI analyses the ticket and tells you what the issue is, how urgent it is, and what tags fit (urgent/important customer/highly negative tone)
+- AI drafts a reply in your brand's tone, ready to review and send
+- Internal team chat gets AI-suggested replies too
 
-## Overview
+Humans stay in control. AI does the heavy reading and drafting.
 
-Customer support queues are noisy, high volume and often messy.  
-Agents waste a lot of time reading long messages, jumping between tools and writing replies from scratch.
+**The Problem:** Support queues can be long. Agents read the same types of messages over and over, jump between tools, and write replies sentence by sentence. It's slow and tiring which impacts the customer satisfaction, especially for firms with rapid growth in customer base.
 
-QueueSense gives support teams a focused ticket dashboard that:
-
-- Summarises tickets automatically  
-- Suggests priority, sentiment and tags  
-- Drafts on brand replies that agents can review, edit and ship  
-
-Humans stay in control, the AI does the heavy reading and drafting.
+**The Solution:** A React frontend connected to n8n workflows that handle AI processing. Three separate workflows analyse tickets, draft replies, and suggest chat responses — all via webhooks.
 
 ---
 
-## Who is it for
+## 🚀 What This Shows
 
-**Target users**
+### **AI Operations & Automation Skills**
+- **Frontend to backend integration**: Connected a React app to n8n via webhooks, replacing direct Gemini API calls with a proper backend architecture
+- **Multi-workflow design**: Built 3 separate n8n workflows for different AI tasks, each with its own webhook endpoint
+- **AI Agent configuration**: Set up OpenAI-powered agents with custom system prompts for ticket analysis, reply drafting, and chat suggestions
+- **Structured data extraction**: Parsed AI output into typed JSON fields for frontend consumption
+- **Prompt engineering**: Designed prompts that return consistent, structured output across different ticket types
+- **Debugging webhook responses**: Fixed array vs object response format issues between n8n and frontend
 
-- Customer Support Agents at B2B SaaS companies  
-- Support Managers and Team Leads  
-
-**Typical situation**
-
-- In the middle of a busy shift  
-- Long backlog of tickets  
-- Many tools open at once, such as help desk, internal docs, CRM, Slack  
-- Need to decide what to answer first and how to respond quickly without mistakes  
-
-The app is simple enough that a non technical support manager can understand it in under a minute during a demo.
+### **System Design Thinking**
+This project shows how to take an AI-powered frontend and give it a proper backend. Instead of calling AI directly from the browser (which exposes API keys), the frontend calls webhooks. The n8n workflows handle AI processing and return clean data. This is how production apps actually work.
 
 ---
 
-## Core problems
+## 🏗️ Architecture
 
-Right now, handling tickets is painful because:
+### **How It Fits Together**
+```
+React Frontend (QueueSense UI)
+        ↓
+   HTTP POST to n8n webhooks
+        ↓
+┌───────────────────────────────────────────────────┐
+│                  n8n Cloud                         │
+│                                                    │
+│  Workflow 1: Ticket Analysis                       │
+│  Webhook → AI Agent → Code Node → Respond          │
+│                                                    │
+│  Workflow 2: Reply Draft                           │
+│  Webhook → AI Agent → Code Node → Respond          │
+│                                                    │
+│  Workflow 3: Chat Reply                            │
+│  Webhook → AI Agent → Code Node → Respond          │
+└───────────────────────────────────────────────────┘
+        ↓
+   JSON response back to frontend
+        ↓
+   UI displays analysis, draft, or chat reply
+```
 
-- Someone manually decides which tickets are urgent or important  
-- Agents read long messages just to understand what the customer is really asking  
-- They click into other tools to see plan, value and history  
-- They write replies sentence by sentence and try to keep tone consistent  
-- Managers lack a clean view of which tickets need help first  
+### **The Three Workflows**
 
-QueueSense reduces this manual effort so humans mainly:
+| Workflow | Endpoint | What It Does | Returns |
+|----------|----------|--------------|---------|
+| **Ticket Analysis** | `/analyse-ticket` | Reads ticket, determines urgency, sentiment, tags | summary, priority, sentiment, tags, confidence, suggested assignee |
+| **Reply Draft** | `/generate-draft` | Writes email reply in brand tone using knowledge base | draft email text |
+| **Chat Reply** | `/generate-chat-reply` | Suggests reply for internal team chat | suggested reply text |
 
-- Scan AI summaries  
-- Adjust priority or tags when needed  
-- Review the AI reply, tweak it and send from their main support tool  
+### **Workflow Structure (Same Pattern for All Three)**
+<img width="1860" height="818" alt="image" src="https://github.com/user-attachments/assets/c253ecbb-0f37-47f7-87df-cd647da74030" />
 
----
-
-## Key features
-
-### Ticket grid with AI summary and priority
-
-- Ticket list shown as a grid of cards in a modern dashboard layout  
-- Each card contains:
-  - Ticket ID and status badge such as Open, Pending, In Progress, Escalated, Resolved  
-  - Subject and short AI generated summary  
-  - Customer or company name  
-  - Assigned agent avatar and name  
-  - Last updated time  
-  - Category tag chips, for example Billing, Authentication, Onboarding  
-  - Priority label such as Low, Medium, High, Critical  
-  - Progress bar that shows the ticket stage: Created, Assigned, In Progress, Resolved  
-
-### Ticket detail with AI analysis
-
-Clicking a card opens a ticket detail view that shows:
-
-- Full conversation text  
-- Customer info such as plan, monthly revenue, high value flag, customer since date  
-- AI Summary section:
-  - Concise summary of the issue  
-  - Suggested priority  
-  - Suggested tags  
-  - Sentiment such as Positive, Neutral, Negative  
-  - Confidence score with a warning if confidence is low  
-
-### AI drafted reply in brand tone
-
-Inside the ticket detail view:
-
-- AI generated reply draft that uses:
-  - Conversation text  
-  - Brand tone configuration  
-  - Product docs or FAQ snippets  
-- Reply remains fully editable by the agent  
-- Controls for:
-  - Regenerate reply  
-  - Make shorter  
-  - Make more detailed  
-  - Copy reply to clipboard  
-
-AI replies are clearly marked as AI generated. The app never auto sends replies.
-
-### Attention dashboard
-
-A compact dashboard highlights:
-
-- Count of high priority tickets  
-- Count of tickets from high value customers  
-- Count of tickets with negative sentiment or urgent language  
-
-This gives managers a quick sense of what needs attention first.
-
-### Human in the loop by design
-
-- AI content is always labeled  
-- All AI text is editable  
-- No one click send from QueueSense  
-- AI can show uncertainty, for example "Low confidence, please review carefully"  
+```
+Webhook (receives POST data)
+    ↓
+AI Agent (OpenAI + custom prompt)
+    ↓
+Code Node (parses output, formats response)
+    ↓
+Respond to Webhook (sends JSON back to frontend)
+```
 
 ---
 
-## User flow
+## 📊 What Each Workflow Returns
 
-1. **Open QueueSense**
-
-   - User lands on the Tickets page  
-   - Ticket grid is preloaded with synthetic sample tickets  
-   - Dashboard tiles show high priority, high value and urgent sentiment counts  
-
-2. **Scan tickets**
-
-   - Filter by status using pill style tabs: All, Open, Pending, Resolved, Closed  
-   - Use search to find tickets by keyword, customer or subject  
-   - Card level summaries and badges help users decide what to open first  
-
-3. **Open a ticket**
-
-   - Click a card to view full ticket details  
-   - See AI summary, suggested priority, tags and sentiment  
-   - Review customer context and history  
-
-4. **Generate and refine a reply**
-
-   - Configure or confirm brand tone and docs  
-   - Generate AI reply draft  
-   - Adjust with Shorter, More detailed or Regenerate controls  
-   - Edit text if needed and copy into the main support tool  
-
-5. **Outcome**
-
-   - Tickets move faster  
-   - Agents spend less time reading and drafting  
-   - Replies feel more consistent and on brand  
-
----
-
-## AI behavior and prompts
-
-The app treats AI as two main services.
-
-### Summary, priority and tags
-
-Conceptual prompt shape:
-
-> You are a support assistant. Read the ticket text and customer info, then respond with JSON containing:
-> - `shortSummary`  
-> - `suggestedPriority` (Low, Medium, High, Critical)  
-> - `tags` (array of short lowercase tags)  
-> - `sentiment` (Positive, Neutral, Negative)  
-> - `confidence` (0 to 1)
-
-Inputs:
-
-- Ticket subject and body  
-- Customer info such as plan, revenue, high value flag, customer since date  
-- Optional docs context  
-
-Outputs are rendered on the ticket card and detail view.
-
-### Reply drafting
-
-Conceptual prompt shape:
-
-> You are writing a reply on behalf of a B2B SaaS support agent.  
-> Use the provided tone description. Use product docs if helpful, do not invent features.  
-> Address the customer by name, be clear and concise, and say that the team will follow up if needed.  
-> Return only the reply text.
-
-Inputs:
-
-- Conversation history for the ticket  
-- Brand tone description  
-- Product docs or FAQ text  
-
-The result is shown in an editable text area with clear "AI generated" labeling.
-
----
-
-## Interface and design
-
-The design follows a modern SaaS dashboard style.
-
-**Branding**
-
-- App name: `QueueSense`  
-- Logo: simple blue circular icon plus wordmark  
-
-**Layout**
-
-- Top navigation bar with logo and main sections:
-  - Inbox, Knowledge Base, Analytics, Tickets, Customers  
-- Tickets section used as the primary view for this demo  
-- Header row with:
-  - Status filter tabs  
-  - Search and filter controls  
-  - Buttons for Performance, Import Tickets, New Ticket  
-
-**Visual style**
-
-- Primary blue: `#006CFF`  
-- Soft sky blue: `#E6F0FF`  
-- Neutral white background with light gray sections  
-- Medium gray secondary text  
-- Yellow for Pending, red for Escalated  
-- Rounded corners and subtle shadows on cards and controls  
-
----
-
-## Data model
-
-Example shape for a ticket object:
-
-```ts
-type Customer = {
-  id: string
-  name: string
-  plan: "Free" | "Starter" | "Pro" | "Enterprise"
-  isHighValue: boolean
-  mrr: number
-  joinedAt: string
+### **Ticket Analysis**
+```json
+{
+  "summary": "Customer cannot log in with SSO after plan upgrade",
+  "suggestedPriority": "Critical",
+  "sentiment": "Urgent",
+  "tags": ["sso", "authentication", "enterprise"],
+  "confidenceScore": 0.92,
+  "suggestedAssignee": "account_manager"
 }
+```
 
-type TicketStatus = "open" | "pending" | "in_progress" | "resolved" | "closed" | "escalated"
-type TicketPriority = "low" | "medium" | "high" | "critical"
+### **Reply Draft**
+```json
+{
+  "draft": "Hi Alice, sorry about the disruption. I know that's urgent..."
+}
+```
 
-type Ticket = {
-  id: string
-  subject: string
-  body: string
-  status: TicketStatus
-  priority: TicketPriority
-  category: string
-  createdAt: string
-  updatedAt: string
-  customer: Customer
-  assignedAgent: {
-    id: string
-    name: string
-    avatarUrl?: string
-  }
-  aiSummary?: string
-  aiSentiment?: "positive" | "neutral" | "negative"
-  aiTags?: string[]
-  aiConfidence?: number
+### **Chat Reply**
+```json
+{
+  "reply": "I can cover Friday — what time is the shift?"
 }
 ```
 
 ---
 
-## 🤝 Connect & Support
+## 🛠️ Tech Used
 
-**Creator:** Sai Charan Medicherla
-
-**Specialties:** AI Operations • Automation Engineering • No-Code AI Solutions
-
-**Currently:** Building AI-powered automation workflows and portfolio projects
-
-**Let's Connect:**
-- 🌐 Portfolio: [https://linkedin-replacer-127790892770.us-west1.run.app/](https://linkedin-replacer-127790892770.us-west1.run.app/)
-- 🐦 X/Twitter: [@mscb160798](https://x.com/mscb160798)
-- 💼 Wellfound: [Sai Medicherla](https://wellfound.com/u/sai-medicherla)
-- 💻 GitHub: [@saicbm98](https://github.com/saicbm98)
-- 📧 Email: [Contact via website](https://linkedin-replacer-127790892770.us-west1.run.app/)
-
-**Open to:** AI Operations roles • Automation Engineering • Product Operations • Remote opportunities
-
-**Availability:** 🟢 Immediate start
+| Tool | What For |
+|------|----------|
+| **React + TypeScript** | Frontend UI |
+| **n8n (cloud)** | Backend workflow engine |
+| **OpenAI GPT** | AI model for analysis and drafting |
+| **Webhooks** | API endpoints connecting frontend to backend |
+| **JavaScript** | Code nodes for parsing AI output |
+| **Tailwind CSS** | Styling |
+| **Claude** | Prompting and debugging |
 
 ---
 
-### ⚡ Built with determination
-*After losing LinkedIn access, I chose to build instead of complain. This is one of several projects showcasing AI automation, prompt engineering, and rapid product development.*
+## 🔧 How to Set It Up
+
+### **What You Need**
+- n8n account (cloud or self-hosted)
+- OpenAI API key
+- Node.js for running the frontend locally
+
+### **Backend Setup (n8n)**
+
+1. **Import the workflows**
+   ```
+   In n8n: Settings → Import from File → Select each workflow JSON
+   ```
+
+2. **Add OpenAI credentials**
+   - Go to Settings → Credentials → Add Credential → OpenAI
+   - Paste your API key
+
+3. **Activate all three workflows**
+   - Toggle each workflow to "Active" in the top right
+
+4. **Copy the webhook URLs**
+   - Click each Webhook node → Production tab → Copy URL
+
+### **Frontend Setup**
+
+1. **Clone the repo and install**
+   ```bash
+   git clone https://github.com/saicbm98/QueSense---AI-powered-customer-ticketing.git
+   cd QueSense---AI-powered-customer-ticketing
+   npm install
+   ```
+
+2. **Update webhook URLs**
+   
+   In `services/geminiService.ts`, update these lines with your webhook URLs:
+   ```typescript
+   const ANALYZE_TICKET_URL = 'https://your-n8n.app.n8n.cloud/webhook/analyse-ticket';
+   const GENERATE_DRAFT_URL = 'https://your-n8n.app.n8n.cloud/webhook/generate-draft';
+   const GENERATE_CHAT_REPLY_URL = 'https://your-n8n.app.n8n.cloud/webhook/generate-chat-reply';
+   ```
+
+3. **Run locally**
+   ```bash
+   npm run dev
+   ```
+
+4. **Test**
+   - Click on any ticket → AI Analysis should appear
+   - Draft email should generate
+   - Go to Inbox → Click sparkle icon → Chat reply should appear
+
+---
+
+## 🎓 Problems I Hit and How I Fixed Them
+
+| Problem | Fix |
+|---------|-----|
+| Frontend was calling Gemini directly (API key exposed) | Replaced with n8n webhook calls |
+| Webhook data was nested inside `body` object | Changed AI Agent prompts from `$json.subject` to `$json.body.subject` |
+| AI output was a JSON string, not parsed object | Added Code node with `JSON.parse()` |
+| n8n returned array `[{...}]` but frontend expected object `{...}` | Changed Respond to Webhook to "First Entry Only" |
+| Sparkle button showed "could not generate reply" | Fixed array unwrapping in frontend service file |
+
+---
+
+## 📂 Files in This Repo
+
+```
+QueSense---AI-powered-customer-ticketing/
+├── src/
+│   ├── components/           # React components
+│   ├── services/
+│   │   └── geminiService.ts  # Webhook calls (renamed from original)
+│   ├── constants.ts          # Mock data
+│   ├── types.ts              # TypeScript types
+│   └── App.tsx               # Main app
+├── workflows/
+│   ├── ticket_analysis.json  # n8n workflow
+│   ├── reply_draft.json      # n8n workflow
+│   └── chat_reply.json       # n8n workflow
+├── package.json
+├── .gitignore
+└── README.md
+```
+
+---
+
+## 🔄 Ways to Customise
+
+- **Different AI model**: Swap OpenAI for Claude or Gemini in the AI Agent nodes
+- **Different tone**: Edit the system prompts in each workflow
+- **Add more context**: Expand the knowledge base in the Reply Draft workflow
+- **Connect to real CRM**: Add HubSpot or Zendesk nodes after the AI processing
+- **Add Slack alerts**: Notify team when high-priority tickets come in
+
+---
+
+## 🤝 Connect
+
+**Built by:** Sai Medicherla
+
+**Links:**
+- 🌐 Portfolio: [linkedin-replacer](https://linkedin-replacer-127790892770.us-west1.run.app/)
+- 🐦 X/Twitter: [@mscb160798](https://x.com/mscb160798)
+- 💻 GitHub: [@saicbm98](https://github.com/saicbm98)
+- 💼 Wellfound: [Sai Medicherla](https://wellfound.com/u/sai-medicherla)
+
+**Looking for:** AI Operations, Automation Engineering, Product Operations
+
+**Available:** Now
+
+---
+
+## 📜 Licence
+
+MIT — use it however you want.
+
+---
+
+⭐ **If this helped, give it a star!**
