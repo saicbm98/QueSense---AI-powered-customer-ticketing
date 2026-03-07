@@ -73,6 +73,7 @@ React Frontend (QueueSense UI)
 ### **Workflow Structure (Same Pattern for All Three)**
 <img width="1860" height="818" alt="image" src="https://github.com/user-attachments/assets/c253ecbb-0f37-47f7-87df-cd647da74030" />
 
+
 ```
 Webhook (receives POST data)
     ↓
