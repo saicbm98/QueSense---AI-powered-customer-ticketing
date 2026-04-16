@@ -17,7 +17,7 @@ Humans stay in control. AI does the heavy reading and drafting.
 
 **The Problem:** Support queues can be long. Agents read the same types of messages over and over, jump between tools, and write replies sentence by sentence. It's slow and tiring which impacts the customer satisfaction, especially for firms with rapid growth in customer base.
 
-**The Solution:** A React frontend connected to n8n workflows that handle AI processing. Three separate workflows analyse tickets, draft replies, and suggest chat responses — all via webhooks.
+**The Solution:** A React frontend connected to n8n workflows that handle AI processing. Three separate workflows analyse tickets, draft replies, and suggest chat responses - all via webhooks.
 
 ---
 
