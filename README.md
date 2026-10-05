@@ -233,12 +233,12 @@ QueSense---AI-powered-customer-ticketing/
 **Built by:** Sai Medicherla
 
 **Links:**
-- 🌐 Portfolio: [linkedin-replacer](https://linkedin-replacer-127790892770.us-west1.run.app/)
+- 🌐 Portfolio: [linkedin-replacer](https://portfolio-website-5686.ai.studio/)
 - 🐦 X/Twitter: [@mscb160798](https://x.com/mscb160798)
 - 💻 GitHub: [@saicbm98](https://github.com/saicbm98)
 - 💼 Wellfound: [Sai Medicherla](https://wellfound.com/u/sai-medicherla)
 
-**Looking for:** AI Operations, Automation Engineering, Product Operations
+**Looking for:** Insurance AI Operations & Automation roles, Product Operations roles
 
 **Available:** Now
 
